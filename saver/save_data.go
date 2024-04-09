@@ -1,6 +1,7 @@
 package saver
 
 import (
+	"fmt"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -12,13 +13,13 @@ func SaveContent(rawURL string, decodedContent []byte, outPutDir string) (err er
 	fileName := filepath.Join(outPutDir, url.QueryEscape(rawURL))
 	file, err := os.Create(fileName)
 	if err != nil {
-		return
+		return fmt.Errorf("os.Create failed:%s", err)
 	}
 	defer file.Close()
 	// 将网页内容写入文件
 	_, err = file.Write(decodedContent)
 	if err != nil {
-		return
+		return fmt.Errorf("file.Write failed:%s", err)
 	}
 	return nil
 }
