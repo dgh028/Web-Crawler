@@ -9,7 +9,7 @@ import (
 func TestSaveContent(t *testing.T) {
 	// 示例URL
 	rawURL := "https://zhuanlan.zhihu.com/p/643739624"
-	content, err := crawler.GetWebPageContent(rawURL)
+	content, err := crawler.GetWebPageContent(rawURL, 1)
 	if err != nil {
 		t.Error(err)
 	}

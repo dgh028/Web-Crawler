@@ -31,23 +31,21 @@ func extractLinks(node *html.Node, baseURL *url.URL) []string {
 	// 递归遍历节点
 	var visitNode func(*html.Node)
 	visitNode = func(n *html.Node) {
+		/*
+			<div>
+				<a href="https://www.creatorblue.com/">创蓝科技</a>
+				<br/>
+				<a href="https://www.budaos.com/">布道师</a>
+			</div>
+		*/
 		if n.Type == html.ElementNode && n.Data == "a" {
 			for _, attr := range n.Attr {
 				if attr.Key == "href" && attr.Val != "javascript:;" && attr.Val != "javascript:void(0)" {
-					//从HTML提取链接时需要处理相对路径和绝对路径
-					// 处理相对路径和绝对路径
-					if strings.HasPrefix(attr.Val, "http://") || strings.HasPrefix(attr.Val, "https://") {
-						// 绝对路径
-						links = append(links, attr.Val)
-					} else {
-						// 相对路径
-						linkURL, err := baseURL.Parse(attr.Val)
-						if err != nil {
-							fmt.Println("baseURL.Parse failed", err)
-							continue
-						}
-						links = append(links, linkURL.String())
+					linkURL, err := baseURL.Parse(attr.Val)
+					if err != nil {
+						continue
 					}
+					links = append(links, linkURL.String())
 				}
 			}
 		}
@@ -58,4 +56,24 @@ func extractLinks(node *html.Node, baseURL *url.URL) []string {
 	visitNode(node)
 
 	return links
+}
+
+// Parse hostname from raw url.
+func ParseHostName(rawUrl string) (string, error) {
+	u, err := url.Parse(rawUrl)
+	if err != nil {
+		return "", err
+	}
+
+	if u.Host == "" {
+		return "", fmt.Errorf("empty host")
+	}
+
+	// 可能出现如xxx.baidu.com:8080这样带端口号的情况
+	hostName := strings.Split(u.Host, ":")
+	if len(hostName) == 0 {
+		return "", fmt.Errorf("invalid hostname")
+	}
+
+	return hostName[0], nil
 }
